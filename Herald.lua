@@ -6,7 +6,9 @@
 --   * at most one line per 60 seconds per channel; extras collapse into a summary
 --   * Petty fines stay private unless the user opts in
 --   * nothing is sent from inside an instance; lines queue until you leave
---   * say / yell / public channels are never automatic
+--   * say / yell / public channels are never automatic: the client refuses addon
+--     messages there unless a key press or click triggered them, so those go
+--     through /minus last or a click on the toast
 local _, ns = ...
 local H = {}
 ns.Herald = H
@@ -120,15 +122,40 @@ function H.Summary()
     return ("%s %s owes %s DKP (%s).%s"):format(ns.TAG, ns.playerName, ns.Comma(-math.min(char.balance, 0)), ns.Rank(char.balance), latest)
 end
 
-function H:Reannounce()
-    local char = ns.char
-    local e = char.log[1]
+-- Finds the numeric id of the zone's General channel (name is "General - <zone>").
+local function GeneralChannel()
+    if not GetChannelName then return nil end
+    for i = 1, 10 do
+        local id, name = GetChannelName(i)
+        if id and id > 0 and type(name) == "string" and name:lower():find("general", 1, true) then return id end
+    end
+end
+
+local PUBLIC_GAP = 30       -- seconds between manual say / General lines
+local lastPublic = -PUBLIC_GAP
+
+-- Announces one ledger entry (default: the latest) to the chosen share channel.
+-- Must be called from a key press or click: the client only lets addons send
+-- to say and to numbered channels in response to a hardware event.
+function H:Reannounce(entry)
+    local e = entry or ns.char.log[1]
     if not e then ns.Print("Nothing to announce. Suspicious.") return end
-    local channel = ns.settings.shareChannel
-    if channel == "PARTY" then channel = GroupChannel() end
+    local choice = ns.settings.shareChannel
+    local channel, target = choice, nil
+    if choice == "PARTY" then
+        channel = GroupChannel()
+    elseif choice == "GENERAL" then
+        channel, target = "CHANNEL", GeneralChannel()
+        if not target then ns.Print("You are not in a General channel here.") return end
+    end
     if not channel or (channel == "GUILD" and not IsInGuild()) then ns.Print("No channel to announce to.") return end
     if ns.Sync.Locked() then ns.Print("Chat is locked in here. Try again outside.") return end
-    SendChat(("%s %s: %s (%s DKP)"):format(ns.TAG, ns.playerName, e.name, ns.FineText(e.fine)), channel)
+    if choice == "SAY" or choice == "GENERAL" then
+        local wait = PUBLIC_GAP - (GetTime() - lastPublic)
+        if wait > 0 then ns.Print(("Easy. Public announcements are limited; try again in %d seconds."):format(math.ceil(wait))) return end
+        lastPublic = GetTime()
+    end
+    SendChat(("%s %s: %s (%s DKP)"):format(ns.TAG, ns.playerName, e.name, ns.FineText(e.fine)), channel, target)
     ns:Fire("REANNOUNCE")
 end
 

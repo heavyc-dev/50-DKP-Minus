@@ -40,6 +40,21 @@ local function Build()
     frame.flavor:SetPoint("RIGHT", -14, 0)
     frame.flavor:SetWordWrap(false)
 
+    -- Clicking the toast is a hardware event, which is what lets this one line
+    -- go to say or General. Right-click dismisses.
+    local click = CreateFrame("Button", nil, frame)
+    click:SetAllPoints()
+    click:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+    click:SetScript("OnClick", function(_, mouse)
+        if mouse ~= "RightButton" and frame.item then ns.Herald:Reannounce(frame.item) end
+        frame.show:Stop()
+        frame:Hide()
+        busy = false
+        T.Next()
+    end)
+    frame.prompt = Th.Text(page, "body", 9, Th.FADED)
+    frame.prompt:SetPoint("BOTTOMRIGHT", -12, 9)
+
     local show = frame:CreateAnimationGroup()
     local slide = show:CreateAnimation("Translation")
     slide:SetOffset(0, -40); slide:SetDuration(0.3); slide:SetSmoothing("OUT")
@@ -72,6 +87,9 @@ function T.Next()
     local big = math.abs(item.fine) >= 500
     frame:SetScale(big and 1.3 or 1)
     frame.kicker:SetText(item.fine < 0 and "FORGIVEN" or (ns.TierOf(item.fine).name:upper() .. " FINE"))
+    frame.item = item
+    local where = ns.settings.shareChannel
+    frame.prompt:SetText("Click to announce in " .. (where == "GENERAL" and "/1" or "/" .. where:lower()))
     frame.title:SetText(item.name)
     frame.fine:SetText(ns.FineText(item.fine))
     frame.flavor:SetText(big and "Removed from guild (not really)." or (item.flavor or ""))

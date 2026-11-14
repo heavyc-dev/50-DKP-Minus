@@ -138,7 +138,7 @@ local DEFAULTS = {
     heraldGuild = true, heraldParty = true, minTier = 50, pettyPublic = false,
     toast = true, sound = true, quiet = false, whisper = true,
     tooltip = true, ownTooltip = false, repeatable = false, experimental = false,
-    shareChannel = "GUILD", minimapAngle = 215, minimapHide = false,
+    shareChannel = "SAY", minimapAngle = 215, minimapHide = false,
 }
 
 local function InitDB()

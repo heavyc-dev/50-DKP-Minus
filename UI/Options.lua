@@ -18,7 +18,7 @@ local CHECKS = {
     { "experimental", "Unverified feats: enable C-rated feats that may not work on Forever" },
 }
 local TIER_STEPS = { 50, 100, 250, 500 }
-local SHARE_STEPS = { "GUILD", "PARTY", "SAY" }
+local SHARE_STEPS = { "SAY", "GENERAL", "GUILD", "PARTY" }
 
 local changed = false
 local function Changed() changed = true end
@@ -91,7 +91,7 @@ function O.Build(panel)
     end
 
     Cycle(panel, 12, y - 6, 240, TIER_STEPS, "minTier", function(v) return "Announce from: " .. ns.TierOf(v).name .. " (-" .. v .. ")" end)
-    Cycle(panel, 262, y - 6, 240, SHARE_STEPS, "shareChannel", function(v) return "/minus last goes to: " .. v:lower() end)
+    Cycle(panel, 262, y - 6, 240, SHARE_STEPS, "shareChannel", function(v) return "Toast click / last: " .. (v == "GENERAL" and "/1 general" or "/" .. v:lower()) end)
     y = y - 36
 
     local head = Th.Text(panel, "head", 15, Th.RED)
