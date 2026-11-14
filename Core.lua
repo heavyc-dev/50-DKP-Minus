@@ -5,6 +5,7 @@ _G.FiftyDKPMinus = ns
 
 ns.TAG = "[50 DKP Minus]"
 ns.REPO = "https://github.com/heavyc-dev/50-DKP-Minus"
+ns.ICON = "Interface\\AddOns\\" .. ADDON .. "\\Media\\icon.png"
 ns.state = {}      -- live, non-combat player state; every signal context falls back to it
 ns.inits = {}      -- run once saved variables exist
 ns.logins = {}     -- run at PLAYER_LOGIN

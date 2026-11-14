@@ -142,13 +142,24 @@ end
 ns.logins[#ns.logins + 1] = function()
     if not Minimap or ns.settings.minimapHide then return end
     local b = CreateFrame("Button", "FiftyDKPMinusMinimapButton", Minimap)
-    b:SetSize(28, 28)
+    b:SetSize(31, 31)
     b:SetFrameStrata("MEDIUM")
     b:SetFrameLevel(8)
+    -- Square artwork, masked to a circle and framed like a stock minimap button.
     local icon = b:CreateTexture(nil, "ARTWORK")
-    icon:SetAllPoints()
-    icon:SetTexture("Interface\\Icons\\INV_Misc_Coin_02")
-    icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    icon:SetSize(22, 22)
+    icon:SetPoint("CENTER")
+    icon:SetTexture(ns.ICON)
+    if b.CreateMaskTexture then
+        local mask = b:CreateMaskTexture()
+        mask:SetAllPoints(icon)
+        mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
+        icon:AddMaskTexture(mask)
+    end
+    local border = b:CreateTexture(nil, "OVERLAY")
+    border:SetSize(53, 53)
+    border:SetPoint("TOPLEFT")
+    border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
     b:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight")
     b:RegisterForClicks("LeftButtonUp", "RightButtonUp")
     b:RegisterForDrag("LeftButton")

@@ -1,5 +1,7 @@
 # 50 DKP Minus
 
+<img src="assets/store-logo.png" width="160" alt="50 DKP Minus logo">
+
 **Not a real DKP addon.** A joke-achievement addon for WoW Forever that fines you for dying in elevators.
 
 Everyone starts at zero and goes down. Every feat is a fine, there is no way to earn DKP back, and the lowest balance in the guild is the "winner". It is not a loot system and it does not track anything useful.

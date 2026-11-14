@@ -3,7 +3,7 @@
 ## Notes: Not a real DKP addon. A joke-achievement addon that fines you for dying in elevators.
 ## Author: Heavy C Dev
 ## Version: @project-version@
-## IconTexture: Interface\Icons\INV_Misc_Coin_02
+## IconTexture: Interface\AddOns\FiftyDKPMinus\Media\icon.png
 ## SavedVariables: FiftyDKPMinusDB
 ## SavedVariablesPerCharacter: FiftyDKPMinusCharDB
 ## AddonCompartmentFunc: FiftyDKPMinus_OnCompartmentClick
