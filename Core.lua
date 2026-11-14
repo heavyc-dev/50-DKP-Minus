@@ -16,6 +16,7 @@ ns.version = (getMeta and getMeta(ADDON, "Version")) or "dev"
 if ns.version:find("@", 1, true) then ns.version = "dev" end
 
 ns.CHANGELOG = {
+    "1.0.0 - First public release. The ledger is open to the whole guild.",
     "0.1.0 - First ledger opened. Engine, signals, herald, sync, ledger and toast.",
 }
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0
+
+First public release. Same ledger as 0.1.0, now open to the whole guild.
+
 ## 0.1.0
 
 First ledger opened.
