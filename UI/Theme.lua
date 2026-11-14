@@ -113,13 +113,12 @@ function Th.Cover(frame)
     else frame:SetBackdropColor(Th.LEATHER[1], Th.LEATHER[2], Th.LEATHER[3], 0.97) end
 end
 
--- The addon icon as a wax seal, tilted.
-function Th.Seal(parent, size, degrees)
+-- The addon's stamp as a seal. The artwork is already tilted and has a
+-- transparent background, so it sits directly on the parchment.
+function Th.Seal(parent, size)
     local t = parent:CreateTexture(nil, "OVERLAY")
     t:SetSize(size, size)
-    t:SetTexture(ns.ICON)
-    t:SetTexCoord(0.07, 0.93, 0.07, 0.93)      -- trim the artwork's dark margin
-    if t.SetRotation and degrees then t:SetRotation(math.rad(degrees)) end
+    t:SetTexture(ns.SEAL)
     return t
 end
 

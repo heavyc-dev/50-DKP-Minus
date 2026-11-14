@@ -20,7 +20,7 @@ local function Build()
     page:SetPoint("BOTTOMRIGHT", -9, 9)
     Th.Parchment(page)
 
-    frame.seal = Th.Seal(page, 62, -10)
+    frame.seal = Th.Seal(page, 68)
     frame.seal:SetPoint("LEFT", 12, 0)
 
     frame.fine = Th.Text(page, "head", 30, Th.RED)

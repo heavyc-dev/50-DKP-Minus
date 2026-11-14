@@ -256,7 +256,7 @@ local function Build()
     s.detail:SetPoint("TOPLEFT", 18, -138)
     s.count = Th.Text(s, "body", 11, Th.FADED)
     s.count:SetPoint("TOPLEFT", 18, -156)
-    local seal = Th.Seal(s, 104, -11)
+    local seal = Th.Seal(s, 112)
     seal:SetPoint("TOPRIGHT", -26, -22)
 
     local recent = Th.Text(s, "head", 17)
