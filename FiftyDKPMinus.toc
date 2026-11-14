@@ -1,6 +1,6 @@
 ## Interface: 16001
 ## Title: 50 DKP Minus
-## Notes: Not a real DKP addon. A joke-achievement addon that fines you for dying in elevators.
+## Notes: Official record of DKP deductions. All fines are final.
 ## Author: Heavy C Dev
 ## Version: @project-version@
 ## IconTexture: Interface\AddOns\FiftyDKPMinus\Media\icon.png

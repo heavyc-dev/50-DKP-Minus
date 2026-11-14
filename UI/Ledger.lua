@@ -197,7 +197,7 @@ local function Build()
     title:SetText("50 DKP Minus")
     L.title = Th.Text(f, "body", 11, { 0.66, 0.55, 0.36 })
     L.title:SetPoint("BOTTOMLEFT", title, "BOTTOMRIGHT", 12, 3)
-    L.title:SetText("Officer's ledger.  Not a real DKP addon.")
+    L.title:SetText("Officer's Ledger")
     local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
     close:SetPoint("TOPRIGHT", -6, -6)
 
@@ -285,7 +285,7 @@ local function Build()
     local note = Th.Text(s, "body", 10, Th.FADED)
     note:SetPoint("LEFT", hint, "RIGHT", 14, 0)
     note:SetPoint("RIGHT", -14, 0)
-    note:SetText("Balances only go down. This is not a loot system.")
+    note:SetText("All fines are final. Appeals may be directed to your raid leader.")
 
     -- Offences
     L.panels.Offences.child = Scroll(L.panels.Offences)
