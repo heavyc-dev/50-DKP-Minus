@@ -1,0 +1,35 @@
+name: Suggest a feat
+description: Propose a new fine. Submitters are credited in flavor text.
+title: "Feat: "
+labels: [feat-suggestion]
+body:
+  - type: input
+    id: name
+    attributes:
+      label: Feat name
+      placeholder: Mind the Gap
+    validations:
+      required: true
+  - type: textarea
+    id: trigger
+    attributes:
+      label: Trigger
+      description: What does the player do to earn it? It cannot depend on combat data (damage, healing, who hit whom).
+    validations:
+      required: true
+  - type: dropdown
+    id: fine
+    attributes:
+      label: Fine
+      options: ["Petty (-5)", "Standard (-50)", "Severe (-100)", "Whelps (-250)", "/gkick Worthy (-500)"]
+    validations:
+      required: true
+  - type: input
+    id: flavor
+    attributes:
+      label: Flavor line (under 60 characters)
+      description: Dry, short, accusatory. Never aimed at real players or groups.
+  - type: input
+    id: credit
+    attributes:
+      label: Name to credit (optional)

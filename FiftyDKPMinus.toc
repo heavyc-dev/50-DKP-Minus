@@ -1,0 +1,42 @@
+## Interface: 16001
+## Title: 50 DKP Minus
+## Notes: Not a real DKP addon. A joke-achievement addon that fines you for dying in elevators.
+## Author: Heavy C Dev
+## Version: @project-version@
+## IconTexture: Interface\Icons\INV_Misc_Coin_02
+## SavedVariables: FiftyDKPMinusDB
+## SavedVariablesPerCharacter: FiftyDKPMinusCharDB
+## AddonCompartmentFunc: FiftyDKPMinus_OnCompartmentClick
+## Category: Roleplay
+## X-License: MIT
+
+Core.lua
+Zones.lua
+Engine.lua
+
+Signals\Time.lua
+Signals\Death.lua
+Signals\Chat.lua
+Signals\UI.lua
+Signals\Movement.lua
+Signals\Economy.lua
+Signals\Quest.lua
+Signals\Social.lua
+Signals\Class.lua
+
+Feats\Core.lua
+Feats\Nostalgia.lua
+Feats\Deaths.lua
+Feats\Habits.lua
+Feats\Social.lua
+Feats\Class.lua
+Feats\Forever.lua
+Feats\Seasonal.lua
+Feats\Crossover.lua
+
+Sync.lua
+Herald.lua
+
+UI\Toast.lua
+UI\Ledger.lua
+UI\Options.lua

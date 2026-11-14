@@ -1,0 +1,27 @@
+name: Report a bug
+description: Something fined you wrongly, failed to fine you, or threw an error.
+title: "Bug: "
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: Include the feat name if one is involved, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: error
+    attributes:
+      label: Lua error text (if any)
+      render: text
+  - type: input
+    id: version
+    attributes:
+      label: Addon version
+      description: Shown in the addon list.
+  - type: input
+    id: context
+    attributes:
+      label: Class, ruleset and client language
+      placeholder: Shaman, Hardcore, enUS
