@@ -37,6 +37,7 @@ Feats\Crossover.lua
 Sync.lua
 Herald.lua
 
+UI\Theme.lua
 UI\Toast.lua
 UI\Ledger.lua
 UI\Options.lua

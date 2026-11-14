@@ -2,6 +2,7 @@
 local _, ns = ...
 local O = {}
 ns.Options = O
+local Th = ns.Theme
 
 local CHECKS = {
     { "heraldGuild", "Announce fines in guild chat" },
@@ -32,7 +33,8 @@ local function Check(parent, label, x, y, get, set)
         text:SetPoint("LEFT", cb, "RIGHT", 2, 0)
     end
     text:SetFontObject("GameFontHighlightSmall")
-    text:SetTextColor(0.20, 0.12, 0.05)
+    text:SetShadowOffset(0, 0)
+    text:SetTextColor(Th.INK[1], Th.INK[2], Th.INK[3])
     text:SetText(label)
     cb:SetScript("OnShow", function(self) self:SetChecked(get()) end)
     cb:SetScript("OnClick", function(self)
@@ -44,8 +46,7 @@ local function Check(parent, label, x, y, get, set)
 end
 
 local function Cycle(parent, x, y, width, steps, key, label)
-    local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-    b:SetSize(width, 22)
+    local b = Th.Button(parent, "", width)
     b:SetPoint("TOPLEFT", x, y)
     local function Update() b:SetText(label(ns.settings[key])) end
     b:SetScript("OnShow", Update)
@@ -86,44 +87,41 @@ function O.Build(panel)
     for _, c in ipairs(CHECKS) do
         local key = c[1]
         Check(panel, c[2], 10, y, function() return ns.settings[key] end, function(v) ns.settings[key] = v end)
-        y = y - 21
+        y = y - 20
     end
 
-    Cycle(panel, 12, y - 6, 220, TIER_STEPS, "minTier", function(v) return "Announce from: " .. ns.TierOf(v).name .. " (-" .. v .. ")" end)
-    Cycle(panel, 240, y - 6, 220, SHARE_STEPS, "shareChannel", function(v) return "/minus last goes to: " .. v:lower() end)
+    Cycle(panel, 12, y - 6, 240, TIER_STEPS, "minTier", function(v) return "Announce from: " .. ns.TierOf(v).name .. " (-" .. v .. ")" end)
+    Cycle(panel, 262, y - 6, 240, SHARE_STEPS, "shareChannel", function(v) return "/minus last goes to: " .. v:lower() end)
     y = y - 36
 
-    local head = ns.Ledger.Text(panel, "GameFontNormal")
+    local head = Th.Text(panel, "head", 15, Th.RED)
     head:SetPoint("TOPLEFT", 14, y)
-    head:SetText("Feat packs")
-    y = y - 16
+    head:SetText("Feat Packs")
+    y = y - 18
     for i, pack in ipairs(ns.packOrder) do
         local col, row = (i - 1) % 4, math.floor((i - 1) / 4)
-        Check(panel, pack, 10 + col * 140, y - row * 21,
+        Check(panel, pack, 10 + col * 138, y - row * 20,
             function() return not ns.settings.packsOff[pack] end,
             function(v) ns.Engine.SetPack(pack, v) end)
     end
     y = y - math.ceil(#ns.packOrder / 4) * 21 - 10
 
     local function Button(label, x, width, fn)
-        local b = CreateFrame("Button", nil, panel, "UIPanelButtonTemplate")
-        b:SetSize(width, 22)
+        local b = Th.Button(panel, label, width, fn)
         b:SetPoint("BOTTOMLEFT", x, 8)
-        b:SetText(label)
-        b:SetScript("OnClick", fn)
     end
-    Button("Report a bug", 10, 110, function()
+    Button("Report a bug", 10, 116, function()
         UrlPopup("Bugs are fined at the standard rate.", ns.REPO .. "/issues/new?template=bug_report.yml")
         ns:Fire("BUG_REPORT")
     end)
-    Button("Suggest a feat", 124, 110, function()
+    Button("Suggest a feat", 132, 122, function()
         UrlPopup("Submitters are credited in flavor text.", ns.REPO .. "/issues/new?template=suggest_a_feat.yml")
     end)
-    Button("Changelog", 238, 100, function()
+    Button("Changelog", 260, 100, function()
         for i = 1, #ns.CHANGELOG do ns.Print(ns.CHANGELOG[i]) end
         ns:Fire("CHANGELOG")
     end)
-    Button("Reset character", 446, 124, function() StaticPopup_Show("FIFTYDKPMINUS_RESET") end)
+    Button("Reset character", 424, 132, function() StaticPopup_Show("FIFTYDKPMINUS_RESET") end)
 
     panel:SetScript("OnShow", function() changed = false end)
     panel:SetScript("OnHide", function() ns:Fire("SETTINGS_CLOSE", { changed = changed }) end)

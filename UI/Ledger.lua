@@ -1,27 +1,18 @@
--- Ledger window: a parody of a raid officer's DKP ledger. Parchment, red ink.
--- Tabs: Statement, Offences, Guild, Settings (Settings is built in Options.lua).
+-- Ledger window: a guild officer's DKP ledger. Leather cover, parchment pages,
+-- red ink. Tabs: Statement, Offences, Guild, Settings (built in Options.lua).
 local _, ns = ...
 local L = {}
 ns.Ledger = L
+local Th = ns.Theme
 
-local INK, RED, FADED = { 0.20, 0.12, 0.05 }, { 0.72, 0.05, 0.05 }, { 0.45, 0.38, 0.28 }
-local ROW_H = 34
-L.INK, L.RED = INK, RED
+local ROW_H = 38
 
-local function Text(parent, font, r, g, b)
-    local fs = parent:CreateFontString(nil, "OVERLAY", font or "GameFontHighlight")
-    fs:SetTextColor(r or INK[1], g or INK[2], b or INK[3])
-    fs:SetJustifyH("LEFT")
-    return fs
-end
-L.Text = Text
-
-local function Scroll(panel)
+local function Scroll(panel, bottom)
     local sf = CreateFrame("ScrollFrame", nil, panel, "UIPanelScrollFrameTemplate")
-    sf:SetPoint("TOPLEFT", 8, -8)
-    sf:SetPoint("BOTTOMRIGHT", -28, 8)
+    sf:SetPoint("TOPLEFT", 6, -4)
+    sf:SetPoint("BOTTOMRIGHT", -26, bottom or 6)
     local child = CreateFrame("Frame", nil, sf)
-    child:SetSize(540, 10)
+    child:SetSize(520, 10)
     sf:SetScrollChild(child)
     child.rows = {}
     return child
@@ -31,20 +22,33 @@ local function Row(child, i)
     local row = child.rows[i]
     if not row then
         row = CreateFrame("Button", nil, child)
-        row:SetSize(540, ROW_H)
+        row:SetSize(520, ROW_H)
         row:SetPoint("TOPLEFT", 0, -(i - 1) * ROW_H)
-        row.left = Text(row, "GameFontNormal")
-        row.left:SetPoint("TOPLEFT", 4, -3)
-        row.right = Text(row, "GameFontNormal", RED[1], RED[2], RED[3])
-        row.right:SetPoint("TOPRIGHT", -4, -3)
+        row.bar = row:CreateTexture(nil, "ARTWORK")
+        row.bar:SetPoint("TOPLEFT", 2, -5)
+        row.bar:SetPoint("BOTTOMLEFT", 2, 5)
+        row.bar:SetWidth(3)
+        row.left = Th.Text(row, "head", 15)
+        row.left:SetPoint("TOPLEFT", 12, -4)
+        row.right = Th.Text(row, "head", 15, Th.RED)
+        row.right:SetPoint("TOPRIGHT", -6, -4)
         row.right:SetJustifyH("RIGHT")
-        row.sub = Text(row, "GameFontHighlightSmall", FADED[1], FADED[2], FADED[3])
-        row.sub:SetPoint("TOPLEFT", 4, -18)
-        row.sub:SetPoint("RIGHT", -4, 0)
+        row.sub = Th.Text(row, "body", 11, Th.FADED)
+        row.sub:SetPoint("TOPLEFT", 12, -21)
+        row.sub:SetPoint("RIGHT", -6, 0)
         row.sub:SetWordWrap(false)
+        row.rule = Th.Rule(row, 0.16)
+        row.rule:SetPoint("BOTTOMLEFT", 8, 0)
+        row.rule:SetPoint("BOTTOMRIGHT", -4, 0)
+        local hl = row:CreateTexture(nil, "HIGHLIGHT")
+        hl:SetAllPoints()
+        hl:SetColorTexture(Th.INK[1], Th.INK[2], Th.INK[3], 0.07)
         child.rows[i] = row
     end
     row:SetScript("OnClick", nil)
+    row.bar:Hide()
+    row.left:ClearAllPoints()
+    row.left:SetPoint("TOPLEFT", 12, -4)
     row:Show()
     return row
 end
@@ -54,29 +58,35 @@ local function Finish(child, used)
     child:SetHeight(math.max(10, used * ROW_H))
 end
 
+local function InkHex(c) return ("|cff%02x%02x%02x"):format(math.floor(c[1] * 255), math.floor(c[2] * 255), math.floor(c[3] * 255)) end
+
 ---------------------------------------------------------------------------
 -- Tabs
 ---------------------------------------------------------------------------
 local function RefreshStatement(p)
     local char = ns.char
-    p.balance:SetText(ns.BalanceText(char.balance) .. " DKP")
-    p.rank:SetText(("Standing: %s      This week: %s      Account: %s"):format(
-        ns.Rank(char.balance), ns.BalanceText(char.weekly), ns.BalanceText(ns.AccountTotal())))
-    p.count:SetText(("%d of %d offences on file."):format(ns.Engine.CountEarned(), #ns.feats))
+    p.balance:SetText(ns.BalanceText(char.balance))
+    p.rank:SetText(ns.Rank(char.balance))
+    p.detail:SetText(("This week  %s%s|r        Account  %s%s|r"):format(
+        InkHex(Th.RED), ns.BalanceText(char.weekly), InkHex(Th.RED), ns.BalanceText(ns.AccountTotal())))
+    p.count:SetText(("%d of %d offences on file"):format(ns.Engine.CountEarned(), #ns.feats))
     for i = 1, 5 do
         local e = char.log[i]
         local line = p.lines[i]
         if e then
-            line:SetText(("%s   %s   |cffb80d0d%s|r   %s"):format(date("%d %b", e.t), e.name, ns.FineText(e.fine), e.z or ""))
+            line.left:SetText(("%s   %s"):format(date("%d %b", e.t), e.name))
+            line.right:SetText(ns.FineText(e.fine))
+            line.where:SetText(e.z or "")
         else
-            line:SetText(i == 1 and "No fines on record. This will not last." or "")
+            line.left:SetText(i == 1 and "No fines on record. This will not last." or "")
+            line.right:SetText("")
+            line.where:SetText("")
         end
     end
 end
 
 local function RefreshOffences(p)
     local child, n = p.child, 0
-    local char = ns.char
     for _, pack in ipairs(ns.packOrder) do
         local header = false
         for _, f in ipairs(ns.feats) do
@@ -88,18 +98,22 @@ local function RefreshOffences(p)
                         header = true
                         n = n + 1
                         local h = Row(child, n)
-                        h.left:SetText("|cffb80d0d" .. pack:upper() .. (ns.settings.packsOff[pack] and "  (off)" or "") .. "|r")
+                        h.left:ClearAllPoints()
+                        h.left:SetPoint("TOPLEFT", 4, -14)
+                        h.left:SetText(InkHex(Th.RED) .. pack .. (ns.settings.packsOff[pack] and "  (off)" or "") .. "|r")
                         h.right:SetText("")
                         h.sub:SetText("")
                     end
                     n = n + 1
                     local row = Row(child, n)
                     if e then
-                        row.left:SetText(("|c%s%s|r"):format(ns.TierOf(fine).color, name))
+                        row.bar:SetColorTexture(Th.TierInk(fine))
+                        row.bar:Show()
+                        row.left:SetText(name)
                         row.right:SetText(ns.FineText(fine))
-                        row.sub:SetText(("%s  -  %s"):format(f.flavor or "", date("%d %b %Y", e.t)))
+                        row.sub:SetText(("%s   -   %s"):format(f.flavor or "", date("%d %b %Y", e.t)))
                     else
-                        row.left:SetText("|cff8a7a60???|r")
+                        row.left:SetText(InkHex(Th.FADED) .. "? ? ?|r")
                         row.right:SetText("")
                         row.sub:SetText(f.hint or "")
                     end
@@ -115,9 +129,10 @@ local function RefreshGuild(p)
     local rows = ns.Sync:Leaderboard(p.weekly)
     for i, r in ipairs(rows) do
         local row = Row(child, i)
-        row.left:SetText(("%d. %s%s"):format(i, r.name, r.me and " (you)" or ""))
-        row.right:SetText(("%s  |cff73614a(week %s)|r"):format(ns.BalanceText(r.total), ns.BalanceText(r.weekly)))
-        row.sub:SetText(r.latest ~= "" and ("Latest: " .. r.latest) or "")
+        row.left:SetText(("%d.  %s%s"):format(i, r.name, r.me and "  (you)" or ""))
+        row.right:SetText(ns.BalanceText(p.weekly and r.weekly or r.total))
+        row.sub:SetText((p.weekly and ("All time " .. ns.BalanceText(r.total)) or ("This week " .. ns.BalanceText(r.weekly)))
+            .. (r.latest ~= "" and ("     Latest: " .. r.latest) or ""))
         if not r.me then
             row:SetScript("OnClick", function()
                 ns.Sync:Request(r.name)
@@ -146,21 +161,25 @@ end
 ---------------------------------------------------------------------------
 local TABS = { "Statement", "Offences", "Guild", "Settings" }
 
+local function StyleTab(button, selected)
+    local c = selected and Th.RED or Th.FADED
+    button.label:SetTextColor(c[1], c[2], c[3])
+    if selected then button.underline:Show() else button.underline:Hide() end
+end
+
 local function Select(name)
     L.tab = name
     for tab, panel in pairs(L.panels) do
         if tab == name then panel:Show() else panel:Hide() end
     end
-    for tab, button in pairs(L.buttons) do
-        if tab == name then button:LockHighlight() else button:UnlockHighlight() end
-    end
+    for tab, button in pairs(L.buttons) do StyleTab(button, tab == name) end
     L:Refresh()
 end
 
 local function Build()
-    local f = CreateFrame("Frame", "FiftyDKPMinusLedger", UIParent, "BasicFrameTemplateWithInset")
+    local f = CreateFrame("Frame", "FiftyDKPMinusLedger", UIParent, BackdropTemplateMixin and "BackdropTemplate" or nil)
     L.frame = f
-    f:SetSize(600, 470)
+    f:SetSize(620, 500)
     f:SetPoint("CENTER")
     f:SetFrameStrata("DIALOG")
     f:SetMovable(true)
@@ -170,92 +189,122 @@ local function Build()
     f:SetScript("OnDragStop", f.StopMovingOrSizing)
     f:SetClampedToScreen(true)
     tinsert(UISpecialFrames, "FiftyDKPMinusLedger")
-    local title = f.TitleText or (f.TitleContainer and f.TitleContainer.TitleText)
-    L.title = title
+    Th.Cover(f)
 
-    -- Parchment sits on its own frame so the template's inset cannot cover it.
-    local level = f:GetFrameLevel()
-    local paperFrame = CreateFrame("Frame", nil, f)
-    paperFrame:SetPoint("TOPLEFT", 8, -58)
-    paperFrame:SetPoint("BOTTOMRIGHT", -8, 8)
-    paperFrame:SetFrameLevel(level + 2)
-    local paper = paperFrame:CreateTexture(nil, "BACKGROUND")
-    paper:SetAllPoints()
-    paper:SetColorTexture(0.91, 0.85, 0.69, 1)
+    -- Cover: gilt title, small print, close button.
+    local title = Th.Text(f, "head", 22, Th.GOLD)
+    title:SetPoint("TOPLEFT", 26, -16)
+    title:SetText("50 DKP Minus")
+    L.title = Th.Text(f, "body", 11, { 0.66, 0.55, 0.36 })
+    L.title:SetPoint("BOTTOMLEFT", title, "BOTTOMRIGHT", 12, 3)
+    L.title:SetText("Officer's ledger.  Not a real DKP addon.")
+    local close = CreateFrame("Button", nil, f, "UIPanelCloseButton")
+    close:SetPoint("TOPRIGHT", -6, -6)
 
+    local page = CreateFrame("Frame", nil, f)
+    page:SetPoint("TOPLEFT", 16, -46)
+    page:SetPoint("BOTTOMRIGHT", -16, 16)
+    Th.Parchment(page)
+
+    -- Section tabs, written across the top of the page.
     L.panels, L.buttons = {}, {}
-    for i, name in ipairs(TABS) do
-        local b = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-        b:SetSize(120, 22)
-        b:SetPoint("TOPLEFT", 14 + (i - 1) * 124, -30)
-        b:SetText(name)
+    local x = 22
+    for _, name in ipairs(TABS) do
+        local b = CreateFrame("Button", nil, page)
+        b.label = Th.Text(b, "head", 17, Th.FADED)
+        b.label:SetPoint("CENTER")
+        b.label:SetText(name)
+        b:SetSize(104, 28)
+        b:SetPoint("TOPLEFT", x, -12)
+        x = x + 112
+        b.underline = b:CreateTexture(nil, "ARTWORK")
+        b.underline:SetColorTexture(Th.RED[1], Th.RED[2], Th.RED[3], 0.85)
+        b.underline:SetHeight(2)
+        b.underline:SetPoint("BOTTOMLEFT", 10, 1)
+        b.underline:SetPoint("BOTTOMRIGHT", -10, 1)
         b:SetScript("OnClick", function() Select(name) end)
+        b:SetScript("OnEnter", function(self) self.label:SetTextColor(Th.INK[1], Th.INK[2], Th.INK[3]) end)
+        b:SetScript("OnLeave", function(self) StyleTab(self, L.tab == name) end)
         L.buttons[name] = b
 
-        local p = CreateFrame("Frame", nil, f)
-        p:SetPoint("TOPLEFT", 10, -60)
-        p:SetPoint("BOTTOMRIGHT", -10, 10)
-        p:SetFrameLevel(level + 3)
+        local p = CreateFrame("Frame", nil, page)
+        p:SetPoint("TOPLEFT", 12, -46)
+        p:SetPoint("BOTTOMRIGHT", -12, 12)
         p:Hide()
         L.panels[name] = p
     end
+    local tabRule = Th.Rule(page, 0.4)
+    tabRule:SetPoint("TOPLEFT", 16, -42)
+    tabRule:SetPoint("TOPRIGHT", -16, -42)
 
     -- Statement
     local s = L.panels.Statement
-    local head = Text(s, "GameFontNormalLarge")
-    head:SetPoint("TOPLEFT", 20, -18)
-    head:SetText("Statement of account")
-    s.balance = Text(s, "GameFontNormalHuge", RED[1], RED[2], RED[3])
-    s.balance:SetPoint("TOPLEFT", 20, -48)
-    s.rank = Text(s, "GameFontHighlight")
-    s.rank:SetPoint("TOPLEFT", 20, -84)
-    s.count = Text(s, "GameFontHighlightSmall", FADED[1], FADED[2], FADED[3])
-    s.count:SetPoint("TOPLEFT", 20, -104)
-    local recent = Text(s, "GameFontNormal")
-    recent:SetPoint("TOPLEFT", 20, -140)
-    recent:SetText("Most recent fines")
+    local head = Th.Text(s, "head", 20)
+    head:SetPoint("TOPLEFT", 16, -14)
+    head:SetText("Statement of Account")
+    s.balance = Th.Text(s, "head", 46, Th.RED)
+    s.balance:SetPoint("TOPLEFT", 16, -42)
+    local unit = Th.Text(s, "head", 18, Th.RED)
+    unit:SetPoint("BOTTOMLEFT", s.balance, "BOTTOMRIGHT", 8, 6)
+    unit:SetText("DKP")
+    local standing = Th.Text(s, "body", 10, Th.FADED)
+    standing:SetPoint("TOPLEFT", 18, -98)
+    standing:SetText("STANDING")
+    s.rank = Th.Text(s, "head", 20)
+    s.rank:SetPoint("TOPLEFT", 16, -110)
+    s.detail = Th.Text(s, "body", 12)
+    s.detail:SetPoint("TOPLEFT", 18, -138)
+    s.count = Th.Text(s, "body", 11, Th.FADED)
+    s.count:SetPoint("TOPLEFT", 18, -156)
+    local seal = Th.Seal(s, 104, -11)
+    seal:SetPoint("TOPRIGHT", -26, -22)
+
+    local recent = Th.Text(s, "head", 17)
+    recent:SetPoint("TOPLEFT", 16, -188)
+    recent:SetText("Most Recent Fines")
+    local rule = Th.Rule(s, 0.4)
+    rule:SetPoint("TOPLEFT", 16, -210)
+    rule:SetPoint("TOPRIGHT", -16, -210)
     s.lines = {}
     for i = 1, 5 do
-        s.lines[i] = Text(s, "GameFontHighlight")
-        s.lines[i]:SetPoint("TOPLEFT", 20, -144 - i * 22)
-        s.lines[i]:SetPoint("RIGHT", -20, 0)
-        s.lines[i]:SetWordWrap(false)
+        local y = -188 - i * 30
+        local line = {}
+        line.left = Th.Text(s, "head", 14)
+        line.left:SetPoint("TOPLEFT", 18, y)
+        line.right = Th.Text(s, "head", 14, Th.RED)
+        line.right:SetPoint("TOPRIGHT", -18, y)
+        line.right:SetJustifyH("RIGHT")
+        line.where = Th.Text(s, "body", 10, Th.FADED)
+        line.where:SetPoint("TOPLEFT", 18, y - 15)
+        s.lines[i] = line
     end
-    local note = Text(s, "GameFontHighlightSmall", FADED[1], FADED[2], FADED[3])
-    note:SetPoint("BOTTOMLEFT", 20, 44)
-    note:SetText("Balances only go down. There is no way to earn DKP back. This is not a loot system.")
-    local share = CreateFrame("Button", nil, s, "UIPanelButtonTemplate")
-    share:SetSize(110, 22)
-    share:SetPoint("BOTTOMLEFT", 18, 14)
-    share:SetText("Share")
-    share:SetScript("OnClick", function() ns.Herald:SharePrompt() end)
-    local hint = CreateFrame("Button", nil, s, "UIPanelButtonTemplate")
-    hint:SetSize(110, 22)
+    local share = Th.Button(s, "Share", 100, function() ns.Herald:SharePrompt() end)
+    share:SetPoint("BOTTOMLEFT", 14, 8)
+    local hint = Th.Button(s, "Hint", 100, function() ns.Engine.Hint() end)
     hint:SetPoint("LEFT", share, "RIGHT", 8, 0)
-    hint:SetText("Hint")
-    hint:SetScript("OnClick", function() ns.Engine.Hint() end)
+    local note = Th.Text(s, "body", 10, Th.FADED)
+    note:SetPoint("LEFT", hint, "RIGHT", 14, 0)
+    note:SetPoint("RIGHT", -14, 0)
+    note:SetText("Balances only go down. This is not a loot system.")
 
     -- Offences
     L.panels.Offences.child = Scroll(L.panels.Offences)
 
     -- Guild
     local g = L.panels.Guild
-    g.child = Scroll(g)
-    g.child:GetParent():SetPoint("BOTTOMRIGHT", -28, 34)
-    g.status = Text(g, "GameFontHighlightSmall", FADED[1], FADED[2], FADED[3])
+    g.child = Scroll(g, 38)
+    g.status = Th.Text(g, "body", 11, Th.FADED)
     g.status:SetPoint("BOTTOMLEFT", 130, 14)
     g.status:SetPoint("RIGHT", -10, 0)
     g.status:SetWordWrap(false)
     g.status:SetText("Click a name to request their five worst.")
-    local toggle = CreateFrame("Button", nil, g, "UIPanelButtonTemplate")
-    toggle:SetSize(110, 22)
-    toggle:SetPoint("BOTTOMLEFT", 10, 8)
-    toggle:SetText("All time")
-    toggle:SetScript("OnClick", function()
+    local toggle
+    toggle = Th.Button(g, "All time", 110, function()
         g.weekly = not g.weekly
         toggle:SetText(g.weekly and "This week" or "All time")
         RefreshGuild(g)
     end)
+    toggle:SetPoint("BOTTOMLEFT", 10, 8)
 
     if ns.Options then ns.Options.Build(L.panels.Settings) end
     Select("Statement")
@@ -263,9 +312,6 @@ end
 
 function L:Refresh()
     if not L.frame or not L.frame:IsShown() then return end
-    if L.title then
-        L.title:SetText("50 DKP Minus - not a real DKP addon - Account: " .. ns.BalanceText(ns.AccountTotal()))
-    end
     if L.tab == "Statement" then RefreshStatement(L.panels.Statement)
     elseif L.tab == "Offences" then RefreshOffences(L.panels.Offences)
     elseif L.tab == "Guild" then RefreshGuild(L.panels.Guild) end
