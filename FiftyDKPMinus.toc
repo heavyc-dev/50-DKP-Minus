@@ -9,6 +9,7 @@
 ## AddonCompartmentFunc: FiftyDKPMinus_OnCompartmentClick
 ## Category: Roleplay
 ## X-License: MIT
+## X-Curse-Project-ID: 1804824
 
 Core.lua
 Zones.lua
