@@ -11,5 +11,6 @@ First ledger opened.
 - Guild sync, leaderboard, weekly "most in debt" line and tooltip line.
 - Whisper replies to `!dkp` and `!shame`.
 - Ledger window, toast and minimap button.
+- Click the toast to announce a fine in /say (or General, guild or party).
 
-Not yet tested in game. C-rated feats are off by default.
+Lightly tested in game. C-rated feats are off by default.

@@ -15,7 +15,7 @@ Everyone starts at zero and goes down. Every feat is a fine, there is no way to 
 
 - **329 feats** across ten packs: Core, Nostalgia, Deaths, Habits, Social, Class, Professions, Forever, Seasonal and Crossover. Unearned feats show `???` and a cryptic hint. The worst ones show nothing until you earn them.
 - **Five tiers of fine**: Petty (-5), Standard (-50), Severe (-100), Whelps (-250) and /gkick Worthy (-500).
-- **Herald**: one line in guild or party chat when you are fined. At most one line a minute per channel; bursts collapse into a summary. Petty fines stay private. Nothing is ever sent to say, yell or public channels automatically.
+- **Herald**: one line in guild or party chat when you are fined. At most one line a minute per channel; bursts collapse into a summary. Petty fines stay private. Nothing is ever sent to say, yell or public channels automatically; click the toast to announce a fine in /say.
 - **Ledger** (`/minus`): statement, offences, guild leaderboard and settings, on parchment, in red ink.
 - **Guild sync**: other users' balances appear on the leaderboard and on their tooltip.
 - **For people without the addon**: whisper a user `!dkp` for their balance, or `!shame` for their rarest feat.
@@ -39,7 +39,7 @@ Inside instances Forever blocks addon chat and hides incoming chat, so the addon
 
 ## Status
 
-This is a first release and it has **not yet been tested in game**. It is tested outside the game against a stubbed API (`tests/`), which checks that the files load, the catalog is consistent and the main signal paths award the right feats.
+This is a first release. It loads and awards feats on the live client, but most of the catalog has only had light testing in game, so expect rough edges and please report them. It is also tested outside the game against a stubbed API (`tests/`), which checks that the files load, the catalog is consistent and the main signal paths award the right feats.
 
 Every feat carries a detection rating:
 
